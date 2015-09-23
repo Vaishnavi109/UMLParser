@@ -1,0 +1,82 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+ 
+ options{  static = false;}PARSER_BEGIN (SyntaxAnalyser)import java.io.*;
+import java.io.FileWriter;
+import java.nio.charset.*;
+import net.sourceforge.plantuml.*;
+import java.awt.image.*;
+import javax.imageio.*;
+
+
+public class SyntaxAnalyser{
+	public static void main(String args[])throws ParseException , IOException
+	{
+	  String line = null;
+	  int i=0;
+	  String ClassName = "";
+	  FileInputStream fis = null;
+	  File file =new File("JavaInput.java");
+	  File outputFile = new File("umlInput.txt");	  FileWriter fw = new FileWriter(outputFile.getAbsoluteFile());	  BufferedWriter bw = new BufferedWriter(fw);	  FileReader fileReader = new FileReader(outputFile);	  BufferedReader bufferedReader = new BufferedReader(fileReader);	  StringBuffer stringBuffer = new StringBuffer();	  
+		try
+		{
+		    
+			String StartUml = "@startuml";
+			//bw.write(StartUml+'\n');
+
+			fis = new FileInputStream(file);            SyntaxAnalyser analyser = new SyntaxAnalyser(fis);            while(ClassName!="0")            {            	ClassName = analyser.GetId();					StartUml+= "\n"+ClassName+'\n';
+				System.out.println(StartUml);
+				
+			}
+				
+				String EndUml = "@enduml";
+				StartUml += EndUml;
+				bw.append(StartUml);
+				bw.close();
+				
+			
+			
+
+/*
+				ByteArrayOutputStream output = new ByteArrayOutputStream();
+				SourceStringReader reader=new SourceStringReader("@startuml\nClass A\n@enduml");
+				String desc =reader.generateImage(output);
+				byte [] data = output.toByteArray();
+				InputStream inputImageStream = new ByteArrayInputStream(data);
+				BufferedImage umlImage = ImageIO.read(inputImageStream);
+				ImageIO.write(umlImage, "png", new java.io.File("D:\\image.png"));
+
+				System.out.print(desc);*/
+		   
+		}catch(FileNotFoundException ex){
+	  		System.out.println("FIle not found");
+		}catch(IOException ex)		{
+		  System.out.println("FIle not found1");		}finally		{
+
+		}
+		}}PARSER_END(SyntaxAnalyser)SKIP :{  " "| "\r"| "\t"| "\n"}TOKEN : {  < PUBLIC : "public" >| < CLASS : "class" >| < STATIC : "static" >
+| < INT : "int" >
+| < FLOAT : "float" >
+| < ID: ["a"-"z","A"-"Z"] >
+}String GetId():
+{
+	String className;
+  }
+{
+  className = GetKeywords()  {
+    return className;  }|< EOF >  {    return "0";  }
+}
+
+String GetKeywords() :
+{
+	 String id = "";
+	Token idName = null;
+}
+{
+  <PUBLIC> <CLASS> ( idName = <ID>)
+  {
+    id =  "class" + " " + idName.toString();
+    return id;
+  }  
+}
