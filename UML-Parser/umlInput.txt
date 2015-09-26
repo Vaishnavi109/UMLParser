@@ -1,5 +1,4 @@
 @startuml
-class A
-
-0
+classB<|--class A
+C ()- A
 @enduml

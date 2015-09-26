@@ -5,7 +5,8 @@ import java.nio.charset.*;
 import net.sourceforge.plantuml.*;
 import java.awt.image.*;
 import javax.imageio.*;
-
+import java.util.*;
+import java.lang.*;
 
 public class SyntaxAnalyser implements SyntaxAnalyserConstants {
         public static void main(String args[])throws ParseException , IOException
@@ -18,53 +19,53 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
           File outputFile = new File("umlInput.txt");
           FileWriter fw = new FileWriter(outputFile.getAbsoluteFile());
           BufferedWriter bw = new BufferedWriter(fw);
-          FileReader fileReader = new FileReader(outputFile);
-          BufferedReader bufferedReader = new BufferedReader(fileReader);
-          StringBuffer stringBuffer = new StringBuffer();
-
+          String UmlData ="";
                 try
                 {
 
-                        String StartUml = "@startuml";
-                        //bw.write(StartUml+'\n');
-
-                        fis = new FileInputStream(file);
-            SyntaxAnalyser analyser = new SyntaxAnalyser(fis);
-            while(ClassName!="0")
+                        UmlData +="@startuml"+'\u005cn';
+            SyntaxAnalyser analyser = new SyntaxAnalyser(new FileInputStream(file));
+            while(true)
             {
                 ClassName = analyser.GetId();
-                                StartUml+= "\u005cn"+ClassName+'\u005cn';
-                                System.out.println(StartUml);
+                if(ClassName != "0")
+                {
+                                        UmlData+= ClassName+'\u005cn';
+                                        System.out.println(UmlData);
+                                }
+                else
+                {
+                        System.out.println("else");
+                                        String EndUml = "@enduml";
+                                        UmlData += EndUml;
+                                        bw.write(UmlData);
+                                        bw.close();
+                                        break;
+                    }
 
                         }
 
-                                String EndUml = "@enduml";
-                                StartUml += EndUml;
-                                bw.append(StartUml);
-                                bw.close();
+                        ByteArrayOutputStream output = new ByteArrayOutputStream();
+                        UmlData = "";
+                        BufferedReader br = new BufferedReader(new FileReader(outputFile));
+                        while ((line = br.readLine()) != null) {
+                        UmlData+=line+'\u005cn';
+                }
+                System.out.println(UmlData);
+                        SourceStringReader reader=new SourceStringReader(UmlData);
+                        String desc =reader.generateImage(output);
+                        byte [] data = output.toByteArray();
+                        InputStream inputImageStream = new ByteArrayInputStream(data);
+                        BufferedImage umlImage = ImageIO.read(inputImageStream);
+                        ImageIO.write(umlImage, "png", new java.io.File("D:\u005c\u005cimage.png"));
 
-
-
-
-/*
-				ByteArrayOutputStream output = new ByteArrayOutputStream();
-				SourceStringReader reader=new SourceStringReader("@startuml\nClass A\n@enduml");
-				String desc =reader.generateImage(output);
-				byte [] data = output.toByteArray();
-				InputStream inputImageStream = new ByteArrayInputStream(data);
-				BufferedImage umlImage = ImageIO.read(inputImageStream);
-				ImageIO.write(umlImage, "png", new java.io.File("D:\\image.png"));
-
-				System.out.print(desc);*/
+                        System.out.print(desc);
 
                 }catch(FileNotFoundException ex){
                         System.out.println("FIle not found");
                 }catch(IOException ex)
                 {
                   System.out.println("FIle not found1");
-                }finally
-                {
-
                 }
 
 }
@@ -73,7 +74,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
         String className;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case PUBLIC:
-      className = GetKeywords();
+      className = keyword();
     {if (true) return className;}
       break;
     case 0:
@@ -88,14 +89,96 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public String GetKeywords() throws ParseException {
+  final public String keyword() throws ParseException {
+         String output;
          String id = "";
-        Token idName = null;
+         Token idName=null;
+         Token InheritedClass = null;
+         Token ImplementedClass = null;
+         String[] interfaceList=new String[9999];
+         //String Name = null;
+         boolean i = false;
     jj_consume_token(PUBLIC);
     jj_consume_token(CLASS);
     idName = jj_consume_token(ID);
-    id =  "class" + " " + idName.toString();
-    {if (true) return id;}
+    label_1:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case EXTENDS:
+        ;
+        break;
+      default:
+        jj_la1[1] = jj_gen;
+        break label_1;
+      }
+      jj_consume_token(EXTENDS);
+      InheritedClass = jj_consume_token(ID);
+    }
+    label_2:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case IMPLEMENTS:
+        ;
+        break;
+      default:
+        jj_la1[2] = jj_gen;
+        break label_2;
+      }
+      jj_consume_token(IMPLEMENTS);
+      ImplementedClass = jj_consume_token(ID);
+      label_3:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case DELIMITER:
+          ;
+          break;
+        default:
+          jj_la1[3] = jj_gen;
+          break label_3;
+        }
+        jj_consume_token(DELIMITER);
+        jj_consume_token(ID);
+      }
+    }
+          if(ImplementedClass.toString().contains(","))
+          {
+            interfaceList = ImplementedClass.toString().split(",");
+
+          }
+          else
+          {
+            interfaceList[0]=  ImplementedClass.toString();
+          }
+      if(InheritedClass != null && interfaceList.length==0)
+      {
+
+      id = "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString();
+      {if (true) return id;}
+          }
+          else if(interfaceList.length !=0 && InheritedClass==null )
+          {
+            for (int j=0;j<interfaceList.length;j++)
+            {
+
+            id = interfaceList[j] + "()-"+"class"+idName.toString();
+            {if (true) return id;}
+            }
+          }
+          else if(ImplementedClass !=null && InheritedClass != null)
+          {
+            id = "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString()+"\u005cn";
+            for (int j=0;j<interfaceList.length;j++)
+            {
+              id+= interfaceList[j]+" "+"()-"+" "+idName.toString();
+              {if (true) return id;}
+            }
+
+          }
+        else
+        {
+           id =  "class" + " " + idName.toString();
+            {if (true) return id;}
+         }
     throw new Error("Missing return statement in function");
   }
 
@@ -108,13 +191,13 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[1];
+  final private int[] jj_la1 = new int[4];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x21,};
+      jj_la1_0 = new int[] {0x21,0x100,0x1000,0x2000,};
    }
 
   /** Constructor with InputStream. */
@@ -128,7 +211,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 1; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 4; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -142,7 +225,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 1; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 4; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -152,7 +235,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 1; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 4; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -162,7 +245,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 1; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 4; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -171,7 +254,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 1; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 4; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -180,7 +263,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 1; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 4; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -231,12 +314,12 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[11];
+    boolean[] la1tokens = new boolean[14];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 4; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -245,7 +328,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
         }
       }
     }
-    for (int i = 0; i < 11; i++) {
+    for (int i = 0; i < 14; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

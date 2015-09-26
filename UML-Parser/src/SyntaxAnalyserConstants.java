@@ -15,11 +15,17 @@ public interface SyntaxAnalyserConstants {
   /** RegularExpression Id. */
   int STATIC = 7;
   /** RegularExpression Id. */
-  int INT = 8;
+  int EXTENDS = 8;
   /** RegularExpression Id. */
-  int FLOAT = 9;
+  int INT = 9;
   /** RegularExpression Id. */
-  int ID = 10;
+  int FLOAT = 10;
+  /** RegularExpression Id. */
+  int ID = 11;
+  /** RegularExpression Id. */
+  int IMPLEMENTS = 12;
+  /** RegularExpression Id. */
+  int DELIMITER = 13;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -34,9 +40,12 @@ public interface SyntaxAnalyserConstants {
     "\"public\"",
     "\"class\"",
     "\"static\"",
+    "\"extends\"",
     "\"int\"",
     "\"float\"",
     "<ID>",
+    "\"implements\"",
+    "\",\"",
   };
 
 }
