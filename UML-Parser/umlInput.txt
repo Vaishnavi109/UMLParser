@@ -1,4 +1,6 @@
 @startuml
+class A
 classB<|--class A
-C ()- A
+C()-A
+
 @enduml

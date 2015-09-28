@@ -68,6 +68,8 @@ public class SyntaxAnalyser{
 | < ID: ["a"-"z","A"-"Z"] >
 | < IMPLEMENTS:"implements" >
 | < DELIMITER :",">
+| < OP : ["{","}"]>
+
 }String GetId():
 {
 	String className;
@@ -83,37 +85,44 @@ String keyword() :{ 	 String output;
  	 Token idName=null;
  	 Token InheritedClass = null;
  	 Token ImplementedClass = null;
- 	 String[] interfaceList=new String[9999];
- 	 //String Name = null;
- 	 boolean i = false;}{  < PUBLIC>< CLASS> ( idName = <ID>) (< EXTENDS> (InheritedClass = < ID>))*
-  (< IMPLEMENTS>(ImplementedClass = < ID>(< DELIMITER> < ID>)*))*  {
+ 	 ArrayList list1 = new ArrayList();
+ 	 }{  < PUBLIC>< CLASS> idName = <ID> (< EXTENDS> InheritedClass = < ID>)?
+  (< IMPLEMENTS> ImplementedClass = < ID >)?(list1 = AllInterFaces()) < OP >
+    {
       
-   	  if(ImplementedClass.toString().contains(","))
-   	  {
-   	    interfaceList = ImplementedClass.toString().split(",");
-		   	  }
-   	  else   	  {
-   	    interfaceList[0]=  ImplementedClass.toString();   	  }  
-      if(InheritedClass != null && interfaceList.length==0)
-      {              id = "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString();
-      return id;
+	  id =  "class" + " " + idName.toString()+"\n";
+	
+     
+      if(InheritedClass != null)
+      {        id+= "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString()+"\n";
+      }
+	  if(ImplementedClass !=null)	  {
+	    id += ImplementedClass.toString() + "()-"+idName.toString()+"\n";
 	  }
-	  else if(interfaceList.length !=0 && InheritedClass==null )	  {
-	    for (int j=0;j<interfaceList.length;j++)
-	    {	      
-	    id = interfaceList[j] + "()-"+"class"+idName.toString();
-	    return id;
-	    }	  }
-	  else if(ImplementedClass !=null && InheritedClass != null)
+	  if(list1!=null)
 	  {
-	    id = "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString()+"\n";
-	    for (int j=0;j<interfaceList.length;j++)
-	    {
-	      id+= interfaceList[j]+" "+"()-"+" "+idName.toString();
-	      return id;
-	    }
-	    	  }
-	else	{
-	   id =  "class" + " " + idName.toString();
-	    return id;
-	 }  }}
+	    for(int i=0;i<list1.size();i++)
+	    {	      id+= list1.get(i).toString()+" "+"()-"+" "+idName.toString()+"\n";
+		  
+		}
+	  }
+	  return id;
+	}}
+
+ArrayList AllInterFaces():
+{
+   String AllInterface = new String();
+   Token idName=null;
+   ArrayList identifier = new ArrayList();
+  }
+{          (<DELIMITER> idName = <ID>)*
+	{
+	    if(idName != null)
+	    {	      identifier.add(idName.toString());
+		  return identifier;
+		}
+		else
+			return null;  	   	}
+	
+}
+

@@ -95,90 +95,77 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
          Token idName=null;
          Token InheritedClass = null;
          Token ImplementedClass = null;
-         String[] interfaceList=new String[9999];
-         //String Name = null;
-         boolean i = false;
+         ArrayList list1 = new ArrayList();
     jj_consume_token(PUBLIC);
     jj_consume_token(CLASS);
     idName = jj_consume_token(ID);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case EXTENDS:
+      jj_consume_token(EXTENDS);
+      InheritedClass = jj_consume_token(ID);
+      break;
+    default:
+      jj_la1[1] = jj_gen;
+      ;
+    }
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case IMPLEMENTS:
+      jj_consume_token(IMPLEMENTS);
+      ImplementedClass = jj_consume_token(ID);
+      break;
+    default:
+      jj_la1[2] = jj_gen;
+      ;
+    }
+    list1 = AllInterFaces();
+    jj_consume_token(OP);
+          id =  "class" + " " + idName.toString()+"\u005cn";
+
+
+      if(InheritedClass != null)
+      {
+        id+= "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString()+"\u005cn";
+      }
+          if(ImplementedClass !=null)
+          {
+            id += ImplementedClass.toString() + "()-"+idName.toString()+"\u005cn";
+          }
+          if(list1!=null)
+          {
+            for(int i=0;i<list1.size();i++)
+            {
+              id+= list1.get(i).toString()+" "+"()-"+" "+idName.toString()+"\u005cn";
+
+                }
+          }
+          {if (true) return id;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public ArrayList AllInterFaces() throws ParseException {
+   String AllInterface = new String();
+   Token idName=null;
+   ArrayList identifier = new ArrayList();
     label_1:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case EXTENDS:
+      case DELIMITER:
         ;
         break;
       default:
-        jj_la1[1] = jj_gen;
+        jj_la1[3] = jj_gen;
         break label_1;
       }
-      jj_consume_token(EXTENDS);
-      InheritedClass = jj_consume_token(ID);
+      jj_consume_token(DELIMITER);
+      idName = jj_consume_token(ID);
     }
-    label_2:
-    while (true) {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case IMPLEMENTS:
-        ;
-        break;
-      default:
-        jj_la1[2] = jj_gen;
-        break label_2;
-      }
-      jj_consume_token(IMPLEMENTS);
-      ImplementedClass = jj_consume_token(ID);
-      label_3:
-      while (true) {
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case DELIMITER:
-          ;
-          break;
-        default:
-          jj_la1[3] = jj_gen;
-          break label_3;
-        }
-        jj_consume_token(DELIMITER);
-        jj_consume_token(ID);
-      }
-    }
-          if(ImplementedClass.toString().contains(","))
-          {
-            interfaceList = ImplementedClass.toString().split(",");
-
-          }
-          else
-          {
-            interfaceList[0]=  ImplementedClass.toString();
-          }
-      if(InheritedClass != null && interfaceList.length==0)
-      {
-
-      id = "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString();
-      {if (true) return id;}
-          }
-          else if(interfaceList.length !=0 && InheritedClass==null )
-          {
-            for (int j=0;j<interfaceList.length;j++)
+            if(idName != null)
             {
-
-            id = interfaceList[j] + "()-"+"class"+idName.toString();
-            {if (true) return id;}
-            }
-          }
-          else if(ImplementedClass !=null && InheritedClass != null)
-          {
-            id = "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString()+"\u005cn";
-            for (int j=0;j<interfaceList.length;j++)
-            {
-              id+= interfaceList[j]+" "+"()-"+" "+idName.toString();
-              {if (true) return id;}
-            }
-
-          }
-        else
-        {
-           id =  "class" + " " + idName.toString();
-            {if (true) return id;}
-         }
+              identifier.add(idName.toString());
+                  {if (true) return identifier;}
+                }
+                else
+                        {if (true) return null;}
     throw new Error("Missing return statement in function");
   }
 
@@ -314,7 +301,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[14];
+    boolean[] la1tokens = new boolean[15];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -328,7 +315,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
         }
       }
     }
-    for (int i = 0; i < 14; i++) {
+    for (int i = 0; i < 15; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

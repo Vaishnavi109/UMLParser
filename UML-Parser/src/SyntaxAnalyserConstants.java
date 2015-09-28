@@ -26,6 +26,8 @@ public interface SyntaxAnalyserConstants {
   int IMPLEMENTS = 12;
   /** RegularExpression Id. */
   int DELIMITER = 13;
+  /** RegularExpression Id. */
+  int OP = 14;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -46,6 +48,7 @@ public interface SyntaxAnalyserConstants {
     "<ID>",
     "\"implements\"",
     "\",\"",
+    "<OP>",
   };
 
 }
