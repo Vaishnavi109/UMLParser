@@ -17,17 +17,25 @@ public interface SyntaxAnalyserConstants {
   /** RegularExpression Id. */
   int EXTENDS = 8;
   /** RegularExpression Id. */
-  int INT = 9;
+  int ID = 9;
   /** RegularExpression Id. */
-  int FLOAT = 10;
+  int IMPLEMENTS = 10;
   /** RegularExpression Id. */
-  int ID = 11;
+  int DELIMITER = 11;
   /** RegularExpression Id. */
-  int IMPLEMENTS = 12;
+  int OP = 12;
   /** RegularExpression Id. */
-  int DELIMITER = 13;
+  int IMPORT = 13;
   /** RegularExpression Id. */
-  int OP = 14;
+  int SEMICOLON = 14;
+  /** RegularExpression Id. */
+  int DATATYPE = 15;
+  /** RegularExpression Id. */
+  int CLOSINGBRACKET = 16;
+  /** RegularExpression Id. */
+  int OPENINGBRACKET = 17;
+  /** RegularExpression Id. */
+  int PACKAGES = 18;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -43,12 +51,16 @@ public interface SyntaxAnalyserConstants {
     "\"class\"",
     "\"static\"",
     "\"extends\"",
-    "\"int\"",
-    "\"float\"",
     "<ID>",
     "\"implements\"",
     "\",\"",
     "<OP>",
+    "\"import\"",
+    "\";\"",
+    "<DATATYPE>",
+    "\")\"",
+    "\"(\"",
+    "<PACKAGES>",
   };
 
 }

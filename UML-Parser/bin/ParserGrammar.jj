@@ -60,17 +60,20 @@ public class SyntaxAnalyser{
 		}catch(FileNotFoundException ex){
 	  		System.out.println("FIle not found");
 		}catch(IOException ex)		{
-		  System.out.println("FIle not found1");		}
+		  System.out.println("File not found1");		}
 		}}PARSER_END(SyntaxAnalyser)SKIP :{  " "| "\r"| "\t"| "\n"}TOKEN : {  < PUBLIC : "public" >| < CLASS : "class" >| < STATIC : "static" >
 | < EXTENDS : "extends" >
-| < INT : "int" >
-| < FLOAT : "float" >
-| < ID: ["a"-"z","A"-"Z"] >
+| < ID: ["a"-"z","A"-"Z","0"-"9"] >
 | < IMPLEMENTS:"implements" >
 | < DELIMITER :",">
 | < OP : ["{","}"]>
-
-}String GetId():
+| < IMPORT : "import" >
+| < SEMICOLON :";" >
+| < DATATYPE :"int"|"String"|"float"|"char"|"void">
+| < CLOSINGBRACKET :")" >
+| < OPENINGBRACKET:"(" >
+}TOKEN :{
+   < PACKAGES : (< ID>(".")?("*")?)+ >}String GetId():
 {
 	String className;
 }
@@ -86,13 +89,13 @@ String keyword() :{ 	 String output;
  	 Token InheritedClass = null;
  	 Token ImplementedClass = null;
  	 ArrayList list1 = new ArrayList();
- 	 }{  < PUBLIC>< CLASS> idName = <ID> (< EXTENDS> InheritedClass = < ID>)?
-  (< IMPLEMENTS> ImplementedClass = < ID >)?(list1 = AllInterFaces()) < OP >
+ 	 HashMap<String, String> VarNames = new HashMap<String, String>();
+ 	 HashMap<String, String> MethodNames = new HashMap<String, String>();}{
+  (< IMPORT >[<PACKAGES >|< ID>] < SEMICOLON >)* < PUBLIC>< CLASS> idName = <ID> (< EXTENDS> InheritedClass = < ID>)?
+  (< IMPLEMENTS> ImplementedClass = < ID >)?(list1 = AllInterFaces()) < OP > (VarNames=GetVariableNames()) < OP>
     {
-      
+    
 	  id =  "class" + " " + idName.toString()+"\n";
-	
-     
       if(InheritedClass != null)
       {        id+= "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString()+"\n";
       }
@@ -106,6 +109,22 @@ String keyword() :{ 	 String output;
 		  
 		}
 	  }
+	  id+="class"+ " " + idName.toString()+"{";
+	  Set setVariable = VarNames.entrySet();
+	  Set setMethod = MethodNames.entrySet();
+ 	  Iterator iterator1 = setVariable.iterator();
+ 	  Iterator iterator2 = setMethod.iterator();
+	   while(iterator1.hasNext()) {
+          Map.Entry mentry = (Map.Entry)iterator1.next();
+          id+="\n\t"+mentry.getKey()+" : "+mentry.getValue();
+      }
+      id+="\n}";
+      /*
+      while(iterator2.hasNext()) {
+          Map.Entry mentry = (Map.Entry)iterator2.next();
+          id+="\n\t"+mentry.getKey()+"()"+" : "+mentry.getValue();
+      }
+      id+="\n}";*/
 	  return id;
 	}}
 
@@ -125,4 +144,18 @@ ArrayList AllInterFaces():
 			return null;  	   	}
 	
 }
+
+HashMap GetVariableNames():
+{
+  Token VarName=null;
+  Token Dtype=null;
+  HashMap<String, String> hm = new HashMap<String, String>();}
+{
+  (< PUBLIC> Dtype= < DATATYPE> VarName = <ID > < SEMICOLON>
+  {  
+     hm.put(VarName.toString(),Dtype.toString());  
+  })*
+  {
+    return hm;  }}
+
 

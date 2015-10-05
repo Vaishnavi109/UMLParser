@@ -2,5 +2,13 @@
 class A
 classB<|--class A
 C()-A
-
+class A{
+	a : int
+	b : int
+}
+class D
+class D{
+	a : int
+	b : int
+}
 @enduml
