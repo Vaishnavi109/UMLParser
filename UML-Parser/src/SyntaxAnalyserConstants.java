@@ -11,29 +11,29 @@ public interface SyntaxAnalyserConstants {
   /** RegularExpression Id. */
   int PUBLIC = 5;
   /** RegularExpression Id. */
-  int CLASS = 6;
+  int STATIC = 6;
   /** RegularExpression Id. */
-  int STATIC = 7;
+  int EXTENDS = 7;
   /** RegularExpression Id. */
-  int EXTENDS = 8;
+  int IMPLEMENTS = 8;
   /** RegularExpression Id. */
-  int ID = 9;
+  int DELIMITER = 9;
   /** RegularExpression Id. */
-  int IMPLEMENTS = 10;
+  int OP = 10;
   /** RegularExpression Id. */
-  int DELIMITER = 11;
+  int IMPORT = 11;
   /** RegularExpression Id. */
-  int OP = 12;
+  int SEMICOLON = 12;
   /** RegularExpression Id. */
-  int IMPORT = 13;
+  int DATATYPE = 13;
   /** RegularExpression Id. */
-  int SEMICOLON = 14;
+  int CLOSINGBRACKET = 14;
   /** RegularExpression Id. */
-  int DATATYPE = 15;
+  int OPENINGBRACKET = 15;
   /** RegularExpression Id. */
-  int CLOSINGBRACKET = 16;
+  int TYPE = 16;
   /** RegularExpression Id. */
-  int OPENINGBRACKET = 17;
+  int ID = 17;
   /** RegularExpression Id. */
   int PACKAGES = 18;
 
@@ -48,10 +48,8 @@ public interface SyntaxAnalyserConstants {
     "\"\\t\"",
     "\"\\n\"",
     "\"public\"",
-    "\"class\"",
     "\"static\"",
     "\"extends\"",
-    "<ID>",
     "\"implements\"",
     "\",\"",
     "<OP>",
@@ -60,6 +58,8 @@ public interface SyntaxAnalyserConstants {
     "<DATATYPE>",
     "\")\"",
     "\"(\"",
+    "<TYPE>",
+    "<ID>",
     "<PACKAGES>",
   };
 

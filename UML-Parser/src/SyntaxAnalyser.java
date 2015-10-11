@@ -8,7 +8,9 @@ import javax.imageio.*;
 import java.util.*;
 import java.lang.*;
 
+
 public class SyntaxAnalyser implements SyntaxAnalyserConstants {
+    HashMap<String, String> dependencyMap = new HashMap<String, String>();
         public static void main(String args[])throws ParseException , IOException
         {
           String line = null;
@@ -19,6 +21,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
           File outputFile = new File("umlInput.txt");
           FileWriter fw = new FileWriter(outputFile.getAbsoluteFile());
           BufferedWriter bw = new BufferedWriter(fw);
+
           String UmlData ="";
                 try
                 {
@@ -31,11 +34,11 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
                 if(ClassName != "0")
                 {
                                         UmlData+= ClassName+'\u005cn';
-                                        System.out.println(UmlData);
+
                                 }
                 else
                 {
-                        System.out.println("else");
+
                                         String EndUml = "@enduml";
                                         UmlData += EndUml;
                                         bw.write(UmlData);
@@ -51,7 +54,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
                         while ((line = br.readLine()) != null) {
                         UmlData+=line+'\u005cn';
                 }
-                System.out.println(UmlData);
+
                         SourceStringReader reader=new SourceStringReader(UmlData);
                         String desc =reader.generateImage(output);
                         byte [] data = output.toByteArray();
@@ -59,7 +62,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
                         BufferedImage umlImage = ImageIO.read(inputImageStream);
                         ImageIO.write(umlImage, "png", new java.io.File("D:\u005c\u005cimage.png"));
 
-                        System.out.print(desc);
+
 
                 }catch(FileNotFoundException ex){
                         System.out.println("FIle not found");
@@ -70,8 +73,9 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
 
 }
 
-  final public String GetId() throws ParseException {
+  final public String GetId() throws ParseException, IOException {
         String className;
+        String id ="";
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case PUBLIC:
     case IMPORT:
@@ -80,7 +84,22 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
       break;
     case 0:
       jj_consume_token(0);
-    {if (true) return "0";}
+     Set setDependency = dependencyMap.entrySet();
+         Iterator iterator = setDependency.iterator();
+         while(iterator.hasNext()) {
+                  Map.Entry mentry = (Map.Entry)iterator.next();
+                  System.out.println(mentry.getKey().toString() + " "+mentry.getValue().toString());
+                  id+="\u005cnclass\u005ct"+mentry.getKey().toString()+" -- "+"class\u005ct"+mentry.getValue().toString();
+                  //System.out.println(id);    
+              }
+    File outputFile = new File("umlInput.txt");
+        //FileWriter fw1 = new FileWriter(outputFile.getAbsoluteFile());
+        //BufferedWriter bw1 = new BufferedWriter(fw1);
+    FileWriter writer = new FileWriter(outputFile);
+    writer.write(id);
+    writer.flush();
+    writer.close();
+     {if (true) return "0";}
       break;
     default:
       jj_la1[0] = jj_gen;
@@ -98,7 +117,8 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
          Token ImplementedClass = null;
          ArrayList list1 = new ArrayList();
          HashMap<String, String> VarNames = new HashMap<String, String>();
-         HashMap<String, String> MethodNames = new HashMap<String, String>();
+         String MethodNames = null;
+         Token type = null;
     label_1:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -133,7 +153,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
       jj_consume_token(SEMICOLON);
     }
     jj_consume_token(PUBLIC);
-    jj_consume_token(CLASS);
+    type = jj_consume_token(TYPE);
     idName = jj_consume_token(ID);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case EXTENDS:
@@ -156,41 +176,59 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     list1 = AllInterFaces();
     jj_consume_token(OP);
     VarNames = GetVariableNames();
+    MethodNames = GetMethodNames();
     jj_consume_token(OP);
-          id =  "class" + " " + idName.toString()+"\u005cn";
-      if(InheritedClass != null)
-      {
-        id+= "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString()+"\u005cn";
-      }
-          if(ImplementedClass !=null)
-          {
-            id += ImplementedClass.toString() + "()-"+idName.toString()+"\u005cn";
-          }
-          if(list1!=null)
-          {
-            for(int i=0;i<list1.size();i++)
-            {
-              id+= list1.get(i).toString()+" "+"()-"+" "+idName.toString()+"\u005cn";
+     if(type.toString().equals("class"))
+     {
 
+                  id =  "class" + " " + idName.toString()+"\u005cn";
+              if(InheritedClass != null)
+              {
+                id+= "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString()+"\u005cn";
+              }
+                  if(ImplementedClass !=null)
+                  {
+                    id += ImplementedClass.toString() + "()-"+idName.toString()+"\u005cn";
+                  }
+                  if(list1!=null)
+                  {
+                    for(int i=0;i<list1.size();i++)
+                    {
+                      id+= list1.get(i).toString()+" "+"()-"+" "+idName.toString()+"\u005cn";
+
+                        }
+                  }
+                  id+="class"+ " " + idName.toString()+"{";
+
+                  Set setVariable = VarNames.entrySet();
+                  Iterator iterator1 = setVariable.iterator();
+
+                   while(iterator1.hasNext()) {
+                  Map.Entry mentry = (Map.Entry)iterator1.next();
+                  //System.out.println(mentry.getValue().toString());
+                  if(mentry.getValue().toString().equals("int") || mentry.getValue().toString().equals("String") || mentry.getValue().toString().equals("float")||mentry.getValue().toString().equals("char"))
+                          {
+                                id+="\u005cn\u005ct"+mentry.getKey()+" : "+mentry.getValue();
+
+                 }
+                  else
+                  {
+                  dependencyMap.put(mentry.getValue().toString(),idName.toString());
                 }
-          }
-          id+="class"+ " " + idName.toString()+"{";
-          Set setVariable = VarNames.entrySet();
-          Set setMethod = MethodNames.entrySet();
-          Iterator iterator1 = setVariable.iterator();
-          Iterator iterator2 = setMethod.iterator();
-           while(iterator1.hasNext()) {
-          Map.Entry mentry = (Map.Entry)iterator1.next();
-          id+="\u005cn\u005ct"+mentry.getKey()+" : "+mentry.getValue();
-      }
-      id+="\u005cn}";
-      /*
-      while(iterator2.hasNext()) {
-          Map.Entry mentry = (Map.Entry)iterator2.next();
-          id+="\n\t"+mentry.getKey()+"()"+" : "+mentry.getValue();
-      }
-      id+="\n}";*/
-          {if (true) return id;}
+
+              }
+                  id+="\u005cn"+MethodNames;
+              id+="\u005cn}";
+
+
+
+        }
+        if(type.toString().equals("interface"))
+        {
+          id+="interface\u005ct"+idName.toString();
+
+        }
+        {if (true) return id;}
     throw new Error("Missing return statement in function");
   }
 
@@ -210,14 +248,9 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
       }
       jj_consume_token(DELIMITER);
       idName = jj_consume_token(ID);
-    }
-            if(idName != null)
-            {
               identifier.add(idName.toString());
-                  {if (true) return identifier;}
-                }
-                else
-                        {if (true) return null;}
+    }
+          {if (true) return identifier;}
     throw new Error("Missing return statement in function");
   }
 
@@ -228,18 +261,116 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     label_3:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case PUBLIC:
+      case DATATYPE:
+      case ID:
         ;
         break;
       default:
         jj_la1[7] = jj_gen;
         break label_3;
       }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case DATATYPE:
+        Dtype = jj_consume_token(DATATYPE);
+        VarName = jj_consume_token(ID);
+        jj_consume_token(SEMICOLON);
+     hm.put(VarName.toString(),Dtype.toString());
+        break;
+      case ID:
+        Dtype = jj_consume_token(ID);
+        VarName = jj_consume_token(ID);
+        jj_consume_token(SEMICOLON);
+     hm.put(VarName.toString(),Dtype.toString());
+        break;
+      default:
+        jj_la1[8] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    }
+    {if (true) return hm;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public String GetMethodNames() throws ParseException {
+  Token MethodName=null;
+  Token Dtype=null;
+  HashMap<String, String> hmap = new HashMap<String, String>();
+  String id = "";
+    label_4:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case PUBLIC:
+        ;
+        break;
+      default:
+        jj_la1[9] = jj_gen;
+        break label_4;
+      }
       jj_consume_token(PUBLIC);
       Dtype = jj_consume_token(DATATYPE);
-      VarName = jj_consume_token(ID);
-      jj_consume_token(SEMICOLON);
+      MethodName = jj_consume_token(ID);
+      jj_consume_token(OPENINGBRACKET);
+      hmap = GetMethodVariables();
+      jj_consume_token(OP);
+      jj_consume_token(OP);
+         id+=MethodName.toString()+"(";
+         Set setVariable = hmap.entrySet();
+                 Iterator iterator1 = setVariable.iterator();
+
+                   while(iterator1.hasNext()) {
+                  Map.Entry mentry = (Map.Entry)iterator1.next();
+                  id+=mentry.getKey()+" : "+mentry.getValue();
+              }
+
+
+             id+=")"+":"+Dtype.toString();
+    }
+    {if (true) return id;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public HashMap GetMethodVariables() throws ParseException {
+  Token Dtype=null;
+  Token VarName=null;
+  HashMap<String, String> hm = new HashMap<String, String>();
+    label_5:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case DATATYPE:
+      case CLOSINGBRACKET:
+        ;
+        break;
+      default:
+        jj_la1[10] = jj_gen;
+        break label_5;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case DATATYPE:
+        Dtype = jj_consume_token(DATATYPE);
+        VarName = jj_consume_token(ID);
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case DELIMITER:
+          jj_consume_token(DELIMITER);
+          break;
+        case CLOSINGBRACKET:
+          jj_consume_token(CLOSINGBRACKET);
+          break;
+        default:
+          jj_la1[11] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
      hm.put(VarName.toString(),Dtype.toString());
+        break;
+      case CLOSINGBRACKET:
+        jj_consume_token(CLOSINGBRACKET);
+        break;
+      default:
+        jj_la1[12] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
     }
     {if (true) return hm;}
     throw new Error("Missing return statement in function");
@@ -254,13 +385,13 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[8];
+  final private int[] jj_la1 = new int[13];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x2021,0x2000,0x40200,0x40200,0x100,0x400,0x800,0x20,};
+      jj_la1_0 = new int[] {0x821,0x800,0x60000,0x60000,0x80,0x100,0x200,0x22000,0x22000,0x20,0x6000,0x4200,0x6000,};
    }
 
   /** Constructor with InputStream. */
@@ -274,7 +405,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -288,7 +419,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -298,7 +429,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -308,7 +439,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -317,7 +448,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -326,7 +457,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 8; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -382,7 +513,7 @@ public class SyntaxAnalyser implements SyntaxAnalyserConstants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 13; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {

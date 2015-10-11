@@ -2,7 +2,15 @@
  * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
  */
  
- options{  static = false;}PARSER_BEGIN (SyntaxAnalyser)import java.io.*;
+ 
+options
+{
+  static = false;
+}
+
+PARSER_BEGIN (SyntaxAnalyser)
+
+import java.io.*;
 import java.io.FileWriter;
 import java.nio.charset.*;
 import net.sourceforge.plantuml.*;
@@ -11,8 +19,11 @@ import javax.imageio.*;
 import java.util.*;
 import java.lang.*;
 
-public class SyntaxAnalyser{
-	public static void main(String args[])throws ParseException , IOException
+
+public class SyntaxAnalyser
+{
+    HashMap<String, String> dependencyMap = new HashMap<String, String>();
+ 	public static void main(String args[])throws ParseException , IOException
 	{
 	  String line = null;
 	  int i=0;
@@ -20,24 +31,32 @@ public class SyntaxAnalyser{
 	  FileInputStream fis = null;
 	  File file =new File("JavaInput.java");
 	  File outputFile = new File("umlInput.txt");
-	  FileWriter fw = new FileWriter(outputFile.getAbsoluteFile());	  BufferedWriter bw = new BufferedWriter(fw);	  String UmlData =""; 
+	  FileWriter fw = new FileWriter(outputFile.getAbsoluteFile());
+	  BufferedWriter bw = new BufferedWriter(fw);
+      	 
+	  String UmlData =""; 
 		try
 		{
 		   
-			UmlData +="@startuml"+'\n';            SyntaxAnalyser analyser = new SyntaxAnalyser(new FileInputStream(file));            while(true)            {
+			UmlData +="@startuml"+'\n';
+            SyntaxAnalyser analyser = new SyntaxAnalyser(new FileInputStream(file));
+            while(true)
+            {
                 ClassName = analyser.GetId();
                 if(ClassName != "0")
                 {                           	
 					UmlData+= ClassName+'\n';
-					System.out.println(UmlData);
-				}                else
+	
+				}
+                else
                 {
-	                System.out.println("else");
+	
 					String EndUml = "@enduml";
 					UmlData += EndUml;
 					bw.write(UmlData);
 					bw.close();
-					break;	            }
+					break;
+	            }
              
 			}
 			
@@ -47,7 +66,7 @@ public class SyntaxAnalyser{
 			while ((line = br.readLine()) != null) {
        			UmlData+=line+'\n';
     		}
-    		System.out.println(UmlData);
+    
 			SourceStringReader reader=new SourceStringReader(UmlData);
 			String desc =reader.generateImage(output);
 			byte [] data = output.toByteArray();
@@ -55,15 +74,34 @@ public class SyntaxAnalyser{
 			BufferedImage umlImage = ImageIO.read(inputImageStream);
 			ImageIO.write(umlImage, "png", new java.io.File("D:\\image.png"));
 
-			System.out.print(desc);
+	
 		   
 		}catch(FileNotFoundException ex){
 	  		System.out.println("FIle not found");
-		}catch(IOException ex)		{
-		  System.out.println("File not found1");		}
-		}}PARSER_END(SyntaxAnalyser)SKIP :{  " "| "\r"| "\t"| "\n"}TOKEN : {  < PUBLIC : "public" >| < CLASS : "class" >| < STATIC : "static" >
+		}catch(IOException ex)
+		{
+		  System.out.println("File not found1");
+		}
+		
+}
+
+}
+
+PARSER_END(SyntaxAnalyser)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN : 
+{
+  < PUBLIC : "public" >
+| < STATIC : "static" >
 | < EXTENDS : "extends" >
-| < ID: ["a"-"z","A"-"Z","0"-"9"] >
 | < IMPLEMENTS:"implements" >
 | < DELIMITER :",">
 | < OP : ["{","}"]>
@@ -72,90 +110,190 @@ public class SyntaxAnalyser{
 | < DATATYPE :"int"|"String"|"float"|"char"|"void">
 | < CLOSINGBRACKET :")" >
 | < OPENINGBRACKET:"(" >
-}TOKEN :{
-   < PACKAGES : (< ID>(".")?("*")?)+ >}String GetId():
+| < TYPE:"interface"|"class">
+}
+TOKEN :
+{
+  < ID: (["a"-"z","A"-"Z","0"-"9"])+ >|
+   < PACKAGES : (< ID>(".")?("*")?)+ >
+}
+String GetId() throws IOException:
 {
 	String className;
+	String id ="";
+	  
 }
 {
-  className = keyword()  {
-    return className;  }|< EOF >  {    return "0";  }
-}
+  className = keyword()
+  {
+    return className;
+  }|< EOF >
+  {
+     Set setDependency = dependencyMap.entrySet();
+	 Iterator iterator = setDependency.iterator();
+	 while(iterator.hasNext()) {
+	          Map.Entry mentry = (Map.Entry)iterator.next();
+	          System.out.println(mentry.getKey().toString() + " "+mentry.getValue().toString());
+	          id+="\nclass\t"+mentry.getKey().toString()+" -- "+"class\t"+mentry.getValue().toString();
+	          //System.out.println(id);    
+	      }
+    File outputFile = new File("umlInput.txt");
+	//FileWriter fw1 = new FileWriter(outputFile.getAbsoluteFile());
+	//BufferedWriter bw1 = new BufferedWriter(fw1);
+    FileWriter writer = new FileWriter(outputFile);
+    writer.write(id);
+    writer.flush();
+    writer.close();
+     return "0";
+  }
+
+}
 
 
-String keyword() :{ 	 String output;
+String keyword() :
+{
+ 	 String output;
  	 String id = "";
  	 Token idName=null;
  	 Token InheritedClass = null;
  	 Token ImplementedClass = null;
  	 ArrayList list1 = new ArrayList();
  	 HashMap<String, String> VarNames = new HashMap<String, String>();
- 	 HashMap<String, String> MethodNames = new HashMap<String, String>();}{
-  (< IMPORT >[<PACKAGES >|< ID>] < SEMICOLON >)* < PUBLIC>< CLASS> idName = <ID> (< EXTENDS> InheritedClass = < ID>)?
-  (< IMPLEMENTS> ImplementedClass = < ID >)?(list1 = AllInterFaces()) < OP > (VarNames=GetVariableNames()) < OP>
-    {
-    
-	  id =  "class" + " " + idName.toString()+"\n";
-      if(InheritedClass != null)
-      {        id+= "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString()+"\n";
-      }
-	  if(ImplementedClass !=null)	  {
-	    id += ImplementedClass.toString() + "()-"+idName.toString()+"\n";
-	  }
-	  if(list1!=null)
-	  {
-	    for(int i=0;i<list1.size();i++)
-	    {	      id+= list1.get(i).toString()+" "+"()-"+" "+idName.toString()+"\n";
+ 	 String MethodNames = null;
+ 	 Token type = null;
+}
+{
+  (< IMPORT >[<PACKAGES >|< ID>] < SEMICOLON >)* < PUBLIC> type = < TYPE> idName = <ID> (< EXTENDS> InheritedClass = < ID>)?
+  (< IMPLEMENTS> ImplementedClass = < ID >)?list1 = AllInterFaces() < OP > VarNames=GetVariableNames()
+   MethodNames=GetMethodNames()< OP>
+   
+  
+  {
+     if(type.toString().equals("class"))
+     {          
+		  id =  "class" + " " + idName.toString()+"\n";
+	      if(InheritedClass != null)
+	      {
+	        id+= "class" + InheritedClass.toString()+ "<|--" +"class" + " " + idName.toString()+"\n";
+	      }
+		  if(ImplementedClass !=null)
+		  {
+		    id += ImplementedClass.toString() + "()-"+idName.toString()+"\n";
+		  }
+		  if(list1!=null)
+		  {
+		    for(int i=0;i<list1.size();i++)
+		    {
+		      id+= list1.get(i).toString()+" "+"()-"+" "+idName.toString()+"\n";
+			  
+			}
+		  }
+		  id+="class"+ " " + idName.toString()+"{";
 		  
-		}
-	  }
-	  id+="class"+ " " + idName.toString()+"{";
-	  Set setVariable = VarNames.entrySet();
-	  Set setMethod = MethodNames.entrySet();
- 	  Iterator iterator1 = setVariable.iterator();
- 	  Iterator iterator2 = setMethod.iterator();
-	   while(iterator1.hasNext()) {
-          Map.Entry mentry = (Map.Entry)iterator1.next();
-          id+="\n\t"+mentry.getKey()+" : "+mentry.getValue();
-      }
-      id+="\n}";
-      /*
-      while(iterator2.hasNext()) {
-          Map.Entry mentry = (Map.Entry)iterator2.next();
-          id+="\n\t"+mentry.getKey()+"()"+" : "+mentry.getValue();
-      }
-      id+="\n}";*/
-	  return id;
-	}}
+		  Set setVariable = VarNames.entrySet();
+	 	  Iterator iterator1 = setVariable.iterator();
+	 	  
+		   while(iterator1.hasNext()) {
+	          Map.Entry mentry = (Map.Entry)iterator1.next();
+	          //System.out.println(mentry.getValue().toString());
+	          if(mentry.getValue().toString().equals("int") || mentry.getValue().toString().equals("String") || mentry.getValue().toString().equals("float")||mentry.getValue().toString().equals("char"))
+			  {  				id+="\n\t"+mentry.getKey()+" : "+mentry.getValue();
+	          	
+	         }
+	          else	          {    
+	          dependencyMap.put(mentry.getValue().toString(),idName.toString());	        }	        
+	      }
+		  id+="\n"+MethodNames;
+	      id+="\n}";
+	
+	
+		
+	}
+	if(type.toString().equals("interface"))	{
+	  id+="interface\t"+idName.toString();
+	  	}
+	return id;
+ }
+}
+
+
+
 
 ArrayList AllInterFaces():
 {
    String AllInterface = new String();
    Token idName=null;
    ArrayList identifier = new ArrayList();
-  }
-{          (<DELIMITER> idName = <ID>)*
-	{
-	    if(idName != null)
-	    {	      identifier.add(idName.toString());
-		  return identifier;
-		}
-		else
-			return null;  	   	}
-	
-}
+  
+}
+{    
+    (<DELIMITER> idName = <ID>
+   	{
+	      identifier.add(idName.toString());
+	})*
+	{	  return identifier;
+	}
+}
+
+
 
 HashMap GetVariableNames():
 {
   Token VarName=null;
   Token Dtype=null;
-  HashMap<String, String> hm = new HashMap<String, String>();}
+  HashMap<String, String> hm = new HashMap<String, String>();
+}
 {
-  (< PUBLIC> Dtype= < DATATYPE> VarName = <ID > < SEMICOLON>
+  (Dtype= < DATATYPE> VarName = <ID > < SEMICOLON>
   {  
      hm.put(VarName.toString(),Dtype.toString());  
-  })*
+  }|Dtype= < ID> VarName = <ID > < SEMICOLON>
   {
-    return hm;  }}
+     hm.put(VarName.toString(),Dtype.toString());  })*
+  {
+    return hm;
+  }
+}
 
+String GetMethodNames():
+{
+  Token MethodName=null;
+  Token Dtype=null;
+  HashMap<String, String> hmap = new HashMap<String, String>();
+  String id = "";
+}
+{
+  (< PUBLIC> Dtype= < DATATYPE> MethodName = <ID > < OPENINGBRACKET>hmap=GetMethodVariables() < OP>< OP>
+  {
+         
+         id+=MethodName.toString()+"(";
+     	 Set setVariable = hmap.entrySet();
+	 	 Iterator iterator1 = setVariable.iterator();
+	 	  
+		   while(iterator1.hasNext()) {
+	          Map.Entry mentry = (Map.Entry)iterator1.next();
+	          id+=mentry.getKey()+" : "+mentry.getValue();
+	      }
+	
+              
+	     id+=")"+":"+Dtype.toString();
+  })*
+  {   
+    return id;
+  }
+}
+
+HashMap GetMethodVariables():
+{
+  Token Dtype=null;
+  Token VarName=null;
+  HashMap<String, String> hm = new HashMap<String, String>();}
+{
+  (Dtype= < DATATYPE> VarName = <ID > (< DELIMITER>|< CLOSINGBRACKET>)
+  {  
+     hm.put(VarName.toString(),Dtype.toString());  
+  }|< CLOSINGBRACKET>)*
+  {
+    return hm;
+  }}
 
